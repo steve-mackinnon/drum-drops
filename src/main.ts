@@ -56,6 +56,7 @@ app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
     body: Bodies.circle(local.x, local.y, 5),
   };
   shape.body.mass = 1;
+  shape.body.restitution = 0.9;
   Composite.add(physicsEngine.world, shape.body);
   shapes.push(shape);
 };
@@ -68,7 +69,7 @@ app.ticker.add((delta) => {
   elapsed += delta / 60;
   const amount = Math.sin(elapsed);
   const scale = 1.0 + 0.25 * amount;
-  const alpha = 0.75 + 0.25 * amount;
+  const alpha = 0.8 + 0.25 * amount;
   const angle = 40 * amount;
   for (let i = 0; i < shapes.length; i++) {
     const shape = shapes[i];
