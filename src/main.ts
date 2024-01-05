@@ -21,8 +21,12 @@ const physicsEngine = Engine.create();
 physicsEngine.gravity.scale = 0.1;
 
 const audioContext = new AudioContext();
-Events.on(physicsEngine, "collisionStart", (_) => {
-  playPluck(audioContext);
+Events.on(physicsEngine, "collisionStart", (e) => {
+  let maxSpeed = 0;
+  for (const pair of e.pairs) {
+    maxSpeed = Math.max(maxSpeed, Math.max(pair.bodyA.speed, pair.bodyB.speed));
+  }
+  playPluck(audioContext, maxSpeed);
 });
 
 const shapes: Entity[] = [];

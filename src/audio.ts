@@ -1,13 +1,20 @@
-export function playPluck(audioContext: AudioContext) {
+export function playPluck(audioContext: AudioContext, speed: number) {
+  const gain = speed / 160.0;
+  const frequency = 100 + (speed / 160.0) * 800;
+  const decay = speed / 160.0;
+
   const oscillator = audioContext.createOscillator();
   oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+  oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
 
-  const gain = audioContext.createGain();
-  gain.gain.value = 0.7;
-  gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-  oscillator.connect(gain);
+  const gainNode = audioContext.createGain();
+  gainNode.gain.value = gain;
+  gainNode.gain.exponentialRampToValueAtTime(
+    0.001,
+    audioContext.currentTime + decay
+  );
+  oscillator.connect(gainNode);
   oscillator.start();
 
-  gain.connect(audioContext.destination);
+  gainNode.connect(audioContext.destination);
 }
