@@ -1,9 +1,7 @@
-import { Graphics } from "pixi.js";
+import { Container } from "pixi.js";
+import { Body } from "matter-js";
 
-export interface Shape {
-    origin: {
-        x: number;
-        y: number;
-    },
-    renderObject: Graphics;
+export interface Entity {
+  renderObject: Container;
+  body: Body;
 }
