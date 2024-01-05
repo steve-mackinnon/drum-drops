@@ -1,7 +1,8 @@
+import { Bodies, Composite, Engine, Events } from "matter-js";
+import * as PIXI from "pixi.js";
+import { playPluck } from "./audio";
 import { Entity } from "./shape";
 import "./style.css";
-import * as PIXI from "pixi.js";
-import { Engine, Bodies, Composite } from "matter-js";
 
 const app = new PIXI.Application<HTMLCanvasElement>({
   background: "#000000",
@@ -19,10 +20,10 @@ const app = new PIXI.Application<HTMLCanvasElement>({
 const physicsEngine = Engine.create();
 physicsEngine.gravity.scale = 0.1;
 
-Composite.add(
-  physicsEngine.world,
-  Bodies.rectangle(0, 200, 1000, 10, { isStatic: true })
-);
+const audioContext = new AudioContext();
+Events.on(physicsEngine, "collisionStart", (_) => {
+  playPluck(audioContext);
+});
 
 const shapes: Entity[] = [];
 
@@ -37,12 +38,21 @@ container.y = app.screen.height / 2;
 app.stage.hitArea = new PIXI.Rectangle(0, 0, 1000, 1000);
 app.stage.addChild(container);
 
+// Add ground
+Composite.add(
+  physicsEngine.world,
+  Bodies.rectangle(0, 200, 1000, 10, { isStatic: true })
+);
 const ground = new PIXI.Graphics();
 ground.beginFill(0xff0000);
 ground.drawRect(-500, 200, 1000, 10);
 container.addChild(ground);
 
 app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
+  if (audioContext.state !== "running") {
+    audioContext.resume();
+  }
+
   const local = container.toLocal(ev.global);
   console.log(local);
   const ro = new PIXI.Graphics();
