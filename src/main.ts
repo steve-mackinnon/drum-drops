@@ -20,13 +20,12 @@ const app = new PIXI.Application<HTMLCanvasElement>({
 const physicsEngine = Engine.create();
 physicsEngine.gravity.scale = 0.1;
 
-const audioContext = new AudioContext();
 Events.on(physicsEngine, "collisionStart", (e) => {
   let maxSpeed = 0;
   for (const pair of e.pairs) {
     maxSpeed = Math.max(maxSpeed, Math.max(pair.bodyA.speed, pair.bodyB.speed));
   }
-  playPluck(audioContext, maxSpeed);
+  playPluck(maxSpeed);
 });
 
 const shapes: Entity[] = [];
@@ -45,7 +44,7 @@ app.stage.addChild(container);
 // Add ground
 Composite.add(
   physicsEngine.world,
-  Bodies.rectangle(0, 200, 1000, 10, { isStatic: true })
+  Bodies.rectangle(0, 200, 1000, 10, { isStatic: true }),
 );
 const ground = new PIXI.Graphics();
 ground.beginFill(0xff0000);
@@ -53,10 +52,6 @@ ground.drawRect(-500, 200, 1000, 10);
 container.addChild(ground);
 
 app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
-  if (audioContext.state !== "running") {
-    audioContext.resume();
-  }
-
   const local = container.toLocal(ev.global);
   console.log(local);
   const ro = new PIXI.Graphics();
