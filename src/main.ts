@@ -1,4 +1,4 @@
-import { Bodies, Composite, Engine, Events } from "matter-js";
+import { Body, Bodies, Composite, Engine, Events } from "matter-js";
 import * as PIXI from "pixi.js";
 import { playPluck } from "./audio";
 import { Entity } from "./shape";
@@ -16,6 +16,9 @@ const app = new PIXI.Application<HTMLCanvasElement>({
     wheel: false,
   },
 });
+// @ts-ignore
+globalThis.__PIXI_APP__ = app;
+
 app.ticker.start();
 
 const physicsEngine = Engine.create();
@@ -35,22 +38,22 @@ document.body.appendChild(app.view);
 
 // Add a container to center our sprite stack on the page
 const container = new PIXI.Container();
-container.hitArea = new PIXI.Rectangle(0, 0, 10000, 10000);
-container.eventMode = "dynamic";
-container.x = app.screen.width / 2;
-container.y = app.screen.height / 2;
-app.stage.hitArea = new PIXI.Rectangle(0, 0, 1000, 1000);
+container.eventMode = "static";
 app.stage.addChild(container);
 
-// Add ground
-Composite.add(
-  physicsEngine.world,
-  Bodies.rectangle(0, 200, 1000, 100, { isStatic: true }),
-);
-const ground = new PIXI.Graphics();
-ground.beginFill(0xff0000);
-ground.drawRect(-500, 150, 1000, 100);
-container.addChild(ground);
+const ground: Entity = {
+  renderObject: (() => {
+    const ro = new PIXI.Graphics();
+    ro.beginFill(0xff11ee);
+    ro.drawRect(-100, -5, 200, 10);
+    return ro;
+  })(),
+  body: Bodies.rectangle(0, 0, 200, 10, {
+    isStatic: true,
+  }),
+};
+Composite.add(physicsEngine.world, ground.body);
+container.addChild(ground.renderObject);
 
 app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
   const local = container.toLocal(ev.global);
@@ -75,6 +78,14 @@ let elapsed = 0.0;
 app.ticker.add((delta) => {
   Engine.update(physicsEngine, delta);
 
+  ground.renderObject.x = ground.body.position.x;
+  ground.renderObject.y = ground.body.position.y;
+
+  const groundWidth = ground.body.bounds.max.x - ground.body.bounds.min.x;
+  const groundHeight = ground.body.bounds.max.y - ground.body.bounds.min.y;
+  ground.renderObject.width = groundWidth;
+  ground.renderObject.height = groundHeight;
+
   elapsed += delta / 60;
   const amount = Math.sin(elapsed);
   const scale = 1.0 + 0.25 * amount;
@@ -90,9 +101,31 @@ app.ticker.add((delta) => {
     shape.renderObject.x = shape.body.position.x;
     shape.renderObject.y = shape.body.position.y;
 
-    if (shape.renderObject.y > 2500) {
+    if (shape.renderObject.y > innerHeight + 100) {
       indicesToRemove.push(i);
     }
   }
   shapes = shapes.filter((_, i) => !indicesToRemove.includes(i));
 });
+
+let screenWidth = window.innerWidth;
+let screenHeight = window.innerHeight;
+function handleResize() {
+  app.stage.hitArea = new PIXI.Rectangle(
+    0,
+    0,
+    window.innerWidth,
+    window.innerHeight,
+  );
+
+  const scaleX = innerWidth / screenWidth;
+  screenWidth = innerWidth;
+  screenHeight = innerHeight;
+  Body.scale(ground.body, scaleX, 1);
+  Body.setPosition(ground.body, {
+    x: screenWidth / 2, // - groundWidth / 2,
+    y: screenHeight / 2, // - groundHeight / 2,
+  });
+}
+handleResize();
+window.addEventListener("resize", handleResize);
