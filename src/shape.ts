@@ -1,7 +1,7 @@
 import { Body } from "matter-js";
-import { Container } from "pixi.js";
+import { Graphics } from "pixi.js";
 
 export interface Entity {
-  renderObject: Container;
+  graphics: Graphics;
   body: Body;
 }

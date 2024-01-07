@@ -15,24 +15,25 @@ export function createSurface(
   info: SurfaceInfo,
 ): Entity {
   const surface: Entity = {
-    renderObject: (() => {
-      const ro = new PIXI.Graphics();
-      ro.beginFill(0xff11ee);
-      ro.drawRect(
-        info.x - info.width / 2,
-        info.y - info.height / 2,
-        info.width,
-        info.height,
-      );
-      ro.angle = info.angle;
-      return ro;
-    })(),
+    graphics: new PIXI.Graphics(),
     body: Bodies.rectangle(0, 0, 200, 10, {
       isStatic: true,
       angle: info.angle,
     }),
   };
   Composite.add(world, surface.body);
-  container.addChild(surface.renderObject);
+  container.addChild(surface.graphics);
   return surface;
+}
+
+export function renderPoly(surface: Entity) {
+  surface.graphics.clear();
+  surface.graphics.lineStyle(2, 0xff11ee);
+  const origin = surface.body.vertices[0];
+  surface.graphics.moveTo(origin.x, origin.y);
+  for (let i = 0; i < surface.body.vertices.length; ++i) {
+    const vertex = surface.body.vertices[i];
+    surface.graphics.lineTo(vertex.x, vertex.y);
+  }
+  surface.graphics.lineTo(origin.x, origin.y);
 }

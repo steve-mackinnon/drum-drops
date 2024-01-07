@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js";
 import { playPluck } from "./audio";
 import { Entity } from "./shape";
 import "./style.css";
-import { createSurface } from "./entityfactory";
+import { createSurface, renderPoly } from "./entityfactory";
 
 const app = new PIXI.Application<HTMLCanvasElement>({
   background: "#000000",
@@ -47,8 +47,9 @@ const ground = createSurface(physicsEngine.world, container, {
   y: 0,
   width: 200,
   height: 10,
-  angle: 0,
+  angle: 10,
 });
+
 app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
   const local = container.toLocal(ev.global);
   const ro = new PIXI.Graphics();
@@ -58,7 +59,7 @@ app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
   container.addChild(ro);
 
   const shape: Entity = {
-    renderObject: ro,
+    graphics: ro,
     body: Bodies.circle(local.x, local.y, 5),
   };
   shape.body.mass = 1;
@@ -72,13 +73,7 @@ let elapsed = 0.0;
 app.ticker.add((delta) => {
   Engine.update(physicsEngine, delta);
 
-  ground.renderObject.x = ground.body.position.x;
-  ground.renderObject.y = ground.body.position.y;
-
-  const groundWidth = ground.body.bounds.max.x - ground.body.bounds.min.x;
-  const groundHeight = ground.body.bounds.max.y - ground.body.bounds.min.y;
-  ground.renderObject.width = groundWidth;
-  ground.renderObject.height = groundHeight;
+  renderPoly(ground);
 
   elapsed += delta / 60;
   const amount = Math.sin(elapsed);
@@ -89,13 +84,13 @@ app.ticker.add((delta) => {
   let indicesToRemove: number[] = [];
   for (let i = 0; i < shapes.length; i++) {
     const shape = shapes[i];
-    shape.renderObject.scale.set(scale);
-    shape.renderObject.alpha = alpha;
-    shape.renderObject.angle = angle;
-    shape.renderObject.x = shape.body.position.x;
-    shape.renderObject.y = shape.body.position.y;
+    shape.graphics.scale.set(scale);
+    shape.graphics.alpha = alpha;
+    shape.graphics.angle = angle;
+    shape.graphics.x = shape.body.position.x;
+    shape.graphics.y = shape.body.position.y;
 
-    if (shape.renderObject.y > innerHeight + 100) {
+    if (shape.graphics.y > innerHeight + 100) {
       indicesToRemove.push(i);
     }
   }
