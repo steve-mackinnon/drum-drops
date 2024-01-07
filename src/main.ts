@@ -3,6 +3,7 @@ import * as PIXI from "pixi.js";
 import { playPluck } from "./audio";
 import { Entity } from "./shape";
 import "./style.css";
+import { createSurface } from "./entityfactory";
 
 const app = new PIXI.Application<HTMLCanvasElement>({
   background: "#000000",
@@ -41,20 +42,13 @@ const container = new PIXI.Container();
 container.eventMode = "static";
 app.stage.addChild(container);
 
-const ground: Entity = {
-  renderObject: (() => {
-    const ro = new PIXI.Graphics();
-    ro.beginFill(0xff11ee);
-    ro.drawRect(-100, -5, 200, 10);
-    return ro;
-  })(),
-  body: Bodies.rectangle(0, 0, 200, 10, {
-    isStatic: true,
-  }),
-};
-Composite.add(physicsEngine.world, ground.body);
-container.addChild(ground.renderObject);
-
+const ground = createSurface(physicsEngine.world, container, {
+  x: 0,
+  y: 0,
+  width: 200,
+  height: 10,
+  angle: 0,
+});
 app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
   const local = container.toLocal(ev.global);
   const ro = new PIXI.Graphics();
