@@ -1,14 +1,21 @@
-const audioContext = new AudioContext();
+import * as Tone from "tone";
 
-export function playPluck(speed: number) {
-  if (audioContext.state !== "running") {
-    audioContext.resume();
+// const audioContext = new AudioContext();
+const output = new Tone.Reverb({
+  wet: 0.2,
+  decay: 2.0,
+}).toDestination();
+
+export async function playPluck(speed: number) {
+  if (Tone.getContext().state !== "running") {
+    await Tone.start();
   }
 
   const gain = speed / 160.0;
   const frequency = 100 + (speed / 160.0) * 800;
   const decay = speed / 160.0;
 
+  const audioContext = Tone.context.rawContext;
   const oscillator = audioContext.createOscillator();
   oscillator.type = "sine";
   oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
@@ -23,5 +30,5 @@ export function playPluck(speed: number) {
   oscillator.start();
   oscillator.stop(audioContext.currentTime + decay);
 
-  gainNode.connect(audioContext.destination);
+  gainNode.connect(output.input.input);
 }
