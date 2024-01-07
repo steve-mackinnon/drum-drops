@@ -3,7 +3,11 @@ import * as PIXI from "pixi.js";
 import { playPluck } from "./audio";
 import { Entity } from "./shape";
 import "./style.css";
-import { createSurface, renderPoly } from "./entityfactory";
+import {
+  createRandomizedSurfaces,
+  createSurface,
+  renderPoly,
+} from "./entityfactory";
 
 const app = new PIXI.Application<HTMLCanvasElement>({
   background: "#000000",
@@ -42,13 +46,7 @@ const container = new PIXI.Container();
 container.eventMode = "static";
 app.stage.addChild(container);
 
-const ground = createSurface(physicsEngine.world, container, {
-  x: 0,
-  y: 0,
-  width: 200,
-  height: 10,
-  angle: 10,
-});
+const surfaces = createRandomizedSurfaces(physicsEngine.world, container, 10);
 
 app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
   const local = container.toLocal(ev.global);
@@ -73,7 +71,9 @@ let elapsed = 0.0;
 app.ticker.add((delta) => {
   Engine.update(physicsEngine, delta);
 
-  renderPoly(ground);
+  for (const surface of surfaces) {
+    renderPoly(surface);
+  }
 
   elapsed += delta / 60;
   const amount = Math.sin(elapsed);
@@ -106,15 +106,14 @@ function handleResize() {
     window.innerWidth,
     window.innerHeight,
   );
-
+  return;
   const scaleX = innerWidth / screenWidth;
   screenWidth = innerWidth;
   screenHeight = innerHeight;
-  Body.scale(ground.body, scaleX, 1);
-  Body.setPosition(ground.body, {
-    x: screenWidth / 2, // - groundWidth / 2,
-    y: screenHeight / 2, // - groundHeight / 2,
-  });
+
+  for (const surface of surfaces) {
+    Body.scale(surface.body, scaleX, 1);
+  }
 }
 handleResize();
 window.addEventListener("resize", handleResize);

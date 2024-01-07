@@ -16,7 +16,7 @@ export function createSurface(
 ): Entity {
   const surface: Entity = {
     graphics: new PIXI.Graphics(),
-    body: Bodies.rectangle(0, 0, 200, 10, {
+    body: Bodies.rectangle(info.x, info.y, info.width, info.height, {
       isStatic: true,
       angle: info.angle,
     }),
@@ -36,4 +36,24 @@ export function renderPoly(surface: Entity) {
     surface.graphics.lineTo(vertex.x, vertex.y);
   }
   surface.graphics.lineTo(origin.x, origin.y);
+}
+
+export function createRandomizedSurfaces(
+  world: World,
+  container: PIXI.Container,
+  numToCreate: number,
+): Entity[] {
+  let surfaces: Entity[] = [];
+  for (let i = 0; i < numToCreate; ++i) {
+    surfaces.push(
+      createSurface(world, container, {
+        x: Math.random() * innerWidth * 0.8,
+        y: Math.random() * innerHeight * 0.8,
+        width: Math.random() * 200 + 10,
+        height: Math.random() * 10 + 10,
+        angle: Math.random() * 360,
+      }),
+    );
+  }
+  return surfaces;
 }
