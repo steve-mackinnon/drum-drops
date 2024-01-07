@@ -16,6 +16,7 @@ const app = new PIXI.Application<HTMLCanvasElement>({
     wheel: false,
   },
 });
+app.ticker.start();
 
 const physicsEngine = Engine.create();
 physicsEngine.gravity.scale = 0.1;
@@ -28,7 +29,7 @@ Events.on(physicsEngine, "collisionStart", (e) => {
   playPluck(maxSpeed);
 });
 
-const shapes: Entity[] = [];
+let shapes: Entity[] = [];
 
 document.body.appendChild(app.view);
 
@@ -44,16 +45,15 @@ app.stage.addChild(container);
 // Add ground
 Composite.add(
   physicsEngine.world,
-  Bodies.rectangle(0, 200, 1000, 10, { isStatic: true }),
+  Bodies.rectangle(0, 200, 1000, 100, { isStatic: true }),
 );
 const ground = new PIXI.Graphics();
 ground.beginFill(0xff0000);
-ground.drawRect(-500, 200, 1000, 10);
+ground.drawRect(-500, 150, 1000, 100);
 container.addChild(ground);
 
 app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
   const local = container.toLocal(ev.global);
-  console.log(local);
   const ro = new PIXI.Graphics();
   ro.beginFill(0x33ff00);
   ro.drawCircle(0, 0, 5);
@@ -80,6 +80,8 @@ app.ticker.add((delta) => {
   const scale = 1.0 + 0.25 * amount;
   const alpha = 0.8 + 0.25 * amount;
   const angle = 40 * amount;
+
+  let indicesToRemove: number[] = [];
   for (let i = 0; i < shapes.length; i++) {
     const shape = shapes[i];
     shape.renderObject.scale.set(scale);
@@ -87,5 +89,10 @@ app.ticker.add((delta) => {
     shape.renderObject.angle = angle;
     shape.renderObject.x = shape.body.position.x;
     shape.renderObject.y = shape.body.position.y;
+
+    if (shape.renderObject.y > 2500) {
+      indicesToRemove.push(i);
+    }
   }
+  shapes = shapes.filter((_, i) => !indicesToRemove.includes(i));
 });
