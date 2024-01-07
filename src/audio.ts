@@ -11,7 +11,7 @@ export async function playPluck(speed: number) {
     await Tone.start();
   }
 
-  const gain = speed / 160.0;
+  const gain = 0.7 * (speed / 160.0);
   const frequency = 100 + (speed / 160.0) * 800;
   const decay = speed / 160.0;
 
