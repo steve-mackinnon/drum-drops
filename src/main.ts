@@ -3,11 +3,7 @@ import * as PIXI from "pixi.js";
 import { playPluck } from "./audio";
 import { Entity } from "./shape";
 import "./style.css";
-import {
-  createRandomizedSurfaces,
-  createSurface,
-  renderPoly,
-} from "./entityfactory";
+import { createRandomizedSurfaces, renderPoly } from "./entityfactory";
 
 const app = new PIXI.Application<HTMLCanvasElement>({
   background: "#000000",
@@ -92,13 +88,12 @@ app.ticker.add((delta) => {
 
     if (shape.graphics.y > innerHeight + 100) {
       indicesToRemove.push(i);
+      shape.graphics.destroy();
     }
   }
   shapes = shapes.filter((_, i) => !indicesToRemove.includes(i));
 });
 
-let screenWidth = window.innerWidth;
-let screenHeight = window.innerHeight;
 function handleResize() {
   app.stage.hitArea = new PIXI.Rectangle(
     0,
@@ -106,14 +101,6 @@ function handleResize() {
     window.innerWidth,
     window.innerHeight,
   );
-  return;
-  const scaleX = innerWidth / screenWidth;
-  screenWidth = innerWidth;
-  screenHeight = innerHeight;
-
-  for (const surface of surfaces) {
-    Body.scale(surface.body, scaleX, 1);
-  }
 }
 handleResize();
 window.addEventListener("resize", handleResize);
