@@ -28,14 +28,9 @@ export function createSurface(
 
 export function renderPoly(surface: Entity) {
   surface.graphics.clear();
-  surface.graphics.lineStyle(2, 0xff11ee);
-  const origin = surface.body.vertices[0];
-  surface.graphics.moveTo(origin.x, origin.y);
-  for (let i = 0; i < surface.body.vertices.length; ++i) {
-    const vertex = surface.body.vertices[i];
-    surface.graphics.lineTo(vertex.x, vertex.y);
-  }
-  surface.graphics.lineTo(origin.x, origin.y);
+  surface.graphics.beginFill(0xff11ee);
+  surface.graphics.drawPolygon(surface.body.vertices);
+  surface.graphics.endFill();
 }
 
 export function createRandomizedSurfaces(
@@ -47,13 +42,21 @@ export function createRandomizedSurfaces(
   for (let i = 0; i < numToCreate; ++i) {
     surfaces.push(
       createSurface(world, container, {
-        x: Math.random() * innerWidth * 0.8,
-        y: Math.random() * innerHeight * 0.8,
+        x: Math.random() * innerWidth,
+        y: Math.random() * innerHeight,
         width: Math.random() * 200 + 10,
         height: Math.random() * 10 + 10,
-        angle: Math.random() * 360,
+        angle: getRandomAngleInRadians(),
       }),
     );
   }
   return surfaces;
+}
+
+function getRandomAngleInRadians() {
+  const a = (Math.PI / 4) * Math.random();
+  if (Math.random() > 0.5) {
+    return Math.PI + a;
+  }
+  return Math.PI - a;
 }

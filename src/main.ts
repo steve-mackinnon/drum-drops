@@ -42,7 +42,7 @@ const container = new PIXI.Container();
 container.eventMode = "static";
 app.stage.addChild(container);
 
-const surfaces = createRandomizedSurfaces(physicsEngine.world, container, 10);
+const surfaces = createRandomizedSurfaces(physicsEngine.world, container, 40);
 
 app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
   const local = container.toLocal(ev.global);
