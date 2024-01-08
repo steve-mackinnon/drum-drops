@@ -26,6 +26,33 @@ export function createSurface(
   return surface;
 }
 
+interface Position {
+  x: number;
+  y: number;
+}
+export function createRainDrop(
+  world: World,
+  container: PIXI.Container,
+  origin?: Position,
+): Entity {
+  const ro = new PIXI.Graphics();
+  ro.beginFill(0x33ff00);
+  ro.drawCircle(0, 0, 5);
+
+  const x = origin ? origin.x : Math.random() * innerWidth;
+  const y = origin ? origin.y : 0;
+  container.addChild(ro);
+
+  const shape: Entity = {
+    graphics: ro,
+    body: Bodies.circle(x, y, 5),
+  };
+  shape.body.mass = 1;
+  shape.body.restitution = 0.9;
+  Composite.add(world, shape.body);
+  return shape;
+}
+
 export function renderPoly(surface: Entity) {
   surface.graphics.clear();
   surface.graphics.beginFill(0xff11ee);

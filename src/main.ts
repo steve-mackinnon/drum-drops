@@ -3,7 +3,11 @@ import * as PIXI from "pixi.js";
 import { playPluck } from "./audio";
 import { Entity } from "./shape";
 import "./style.css";
-import { createRandomizedSurfaces, renderPoly } from "./entityfactory";
+import {
+  createRainDrop,
+  createRandomizedSurfaces,
+  renderPoly,
+} from "./entityfactory";
 
 const app = new PIXI.Application<HTMLCanvasElement>({
   background: "#000000",
@@ -46,25 +50,15 @@ const surfaces = createRandomizedSurfaces(physicsEngine.world, container, 40);
 
 app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
   const local = container.toLocal(ev.global);
-  const ro = new PIXI.Graphics();
-  ro.beginFill(0x33ff00);
-  ro.drawCircle(0, 0, 5);
-
-  container.addChild(ro);
-
-  const shape: Entity = {
-    graphics: ro,
-    body: Bodies.circle(local.x, local.y, 5),
-  };
-  shape.body.mass = 1;
-  shape.body.restitution = 0.9;
-  Composite.add(physicsEngine.world, shape.body);
-  shapes.push(shape);
+  shapes.push(createRainDrop(physicsEngine.world, container, local));
 };
 
 // Set all sprite's properties to the same value, animated over time
 let elapsed = 0.0;
 app.ticker.add((delta) => {
+  if (Math.random() > 0.98) {
+    shapes.push(createRainDrop(physicsEngine.world, container));
+  }
   Engine.update(physicsEngine, delta);
 
   for (const surface of surfaces) {
