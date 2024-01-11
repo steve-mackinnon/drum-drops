@@ -19,6 +19,7 @@ export function createSurface(
     body: Bodies.rectangle(info.x, info.y, info.width, info.height, {
       isStatic: true,
       angle: info.angle,
+      density: 1000000000000,
     }),
   };
   Composite.add(world, surface.body);
@@ -36,7 +37,7 @@ export function createRainDrop(
   origin?: Position,
 ): Entity {
   const ro = new PIXI.Graphics();
-  ro.beginFill(0x33ff00);
+  ro.beginFill("rgb(246,228,182)");
   ro.drawCircle(0, 0, 5);
 
   const x = origin ? origin.x : Math.random() * innerWidth;
@@ -55,7 +56,7 @@ export function createRainDrop(
 
 export function renderPoly(surface: Entity) {
   surface.graphics.clear();
-  surface.graphics.beginFill(0xff11ee);
+  surface.graphics.beginFill(0x4d0396);
   surface.graphics.drawPolygon(surface.body.vertices);
   surface.graphics.endFill();
 }

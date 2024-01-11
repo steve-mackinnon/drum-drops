@@ -1,4 +1,4 @@
-import { Body, Bodies, Composite, Engine, Events } from "matter-js";
+import { Body, Engine, Events } from "matter-js";
 import * as PIXI from "pixi.js";
 import { playPluck } from "./audio";
 import { Entity } from "./shape";
@@ -9,8 +9,12 @@ import {
   renderPoly,
 } from "./entityfactory";
 
+const gravity = {
+  x: 0,
+  y: 0.1,
+};
 const app = new PIXI.Application<HTMLCanvasElement>({
-  background: "#000000",
+  background: "rgb(10,10,10)",
   resizeTo: window,
   eventMode: "static",
   antialias: true,
@@ -27,7 +31,7 @@ globalThis.__PIXI_APP__ = app;
 app.ticker.start();
 
 const physicsEngine = Engine.create();
-physicsEngine.gravity.scale = 0.1;
+physicsEngine.gravity.scale = 0;
 
 Events.on(physicsEngine, "collisionStart", (e) => {
   let maxSpeed = 0;
@@ -37,7 +41,7 @@ Events.on(physicsEngine, "collisionStart", (e) => {
   playPluck(maxSpeed);
 });
 
-let shapes: Entity[] = [];
+let drops: Entity[] = [];
 
 document.body.appendChild(app.view);
 
@@ -46,18 +50,26 @@ const container = new PIXI.Container();
 container.eventMode = "static";
 app.stage.addChild(container);
 
-const surfaces = createRandomizedSurfaces(physicsEngine.world, container, 40);
+// Determine the number of surfaces based on the screen width
+const numSurfaces = (22 * (innerWidth * innerHeight)) / 425000;
+const surfaces = createRandomizedSurfaces(
+  physicsEngine.world,
+  container,
+  numSurfaces,
+);
 
+let userHasInteracted = false;
 app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
+  userHasInteracted = true;
   const local = container.toLocal(ev.global);
-  shapes.push(createRainDrop(physicsEngine.world, container, local));
+  drops.push(createRainDrop(physicsEngine.world, container, local));
 };
 
 // Set all sprite's properties to the same value, animated over time
 let elapsed = 0.0;
 app.ticker.add((delta) => {
-  if (Math.random() > 0.98) {
-    shapes.push(createRainDrop(physicsEngine.world, container));
+  if (userHasInteracted && Math.random() > 0.99) {
+    drops.push(createRainDrop(physicsEngine.world, container));
   }
   Engine.update(physicsEngine, delta);
 
@@ -66,26 +78,23 @@ app.ticker.add((delta) => {
   }
 
   elapsed += delta / 60;
-  const amount = Math.sin(elapsed);
-  const scale = 1.0 + 0.25 * amount;
-  const alpha = 0.8 + 0.25 * amount;
-  const angle = 40 * amount;
 
   let indicesToRemove: number[] = [];
-  for (let i = 0; i < shapes.length; i++) {
-    const shape = shapes[i];
-    shape.graphics.scale.set(scale);
-    shape.graphics.alpha = alpha;
-    shape.graphics.angle = angle;
-    shape.graphics.x = shape.body.position.x;
-    shape.graphics.y = shape.body.position.y;
+  for (let i = 0; i < drops.length; i++) {
+    const drop = drops[i];
+    Body.applyForce(drop.body, drop.body.position, {
+      x: drop.body.mass * gravity.x,
+      y: drop.body.mass * gravity.y,
+    });
+    drop.graphics.x = drop.body.position.x;
+    drop.graphics.y = drop.body.position.y;
 
-    if (shape.graphics.y > innerHeight + 100) {
+    if (drop.graphics.y > innerHeight + 100) {
       indicesToRemove.push(i);
-      shape.graphics.destroy();
+      drop.graphics.destroy();
     }
   }
-  shapes = shapes.filter((_, i) => !indicesToRemove.includes(i));
+  drops = drops.filter((_, i) => !indicesToRemove.includes(i));
 });
 
 function handleResize() {
