@@ -1,4 +1,4 @@
-import { Body, Engine, Events } from "matter-js";
+import { Body, Composite, Engine, Events } from "matter-js";
 import * as PIXI from "pixi.js";
 import { playPluck } from "./audio";
 import { Entity } from "./shape";
@@ -50,13 +50,7 @@ const container = new PIXI.Container();
 container.eventMode = "static";
 app.stage.addChild(container);
 
-// Determine the number of surfaces based on the screen width
-const numSurfaces = (22 * (innerWidth * innerHeight)) / 425000;
-const surfaces = createRandomizedSurfaces(
-  physicsEngine.world,
-  container,
-  numSurfaces,
-);
+let surfaces = createMap();
 
 let userHasInteracted = false;
 app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
@@ -107,3 +101,20 @@ function handleResize() {
 }
 handleResize();
 window.addEventListener("resize", handleResize);
+
+function createMap() {
+  // Determine the number of surfaces based on the screen width
+  const numSurfaces = (22 * (innerWidth * innerHeight)) / 425000;
+  return createRandomizedSurfaces(physicsEngine.world, container, numSurfaces);
+}
+
+document.getElementById("reset-button")?.addEventListener("mousedown", () => {
+  if (!surfaces) {
+    return;
+  }
+  for (const surface of surfaces) {
+    surface.graphics.destroy();
+    Composite.remove(physicsEngine.world, surface.body);
+  }
+  surfaces = createMap();
+});

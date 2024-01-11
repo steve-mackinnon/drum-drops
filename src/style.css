@@ -94,3 +94,10 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.reset-button {
+  display: flex;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
