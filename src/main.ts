@@ -35,10 +35,24 @@ physicsEngine.gravity.scale = 0;
 
 Events.on(physicsEngine, "collisionStart", (e) => {
   let maxSpeed = 0;
+  let pan = 0;
   for (const pair of e.pairs) {
-    maxSpeed = Math.max(maxSpeed, Math.max(pair.bodyA.speed, pair.bodyB.speed));
+    if (pair.bodyA.speed > maxSpeed) {
+      maxSpeed = pair.bodyA.speed;
+      pan = (pair.bodyA.position.x / innerWidth) * 2 - 1;
+    }
+    if (pair.bodyB.speed > maxSpeed) {
+      maxSpeed = pair.bodyB.speed;
+      pan = (pair.bodyB.position.x / innerWidth) * 2 - 1;
+    }
   }
-  playPluck(maxSpeed);
+  if (pan < -1) {
+    pan = -1;
+  }
+  if (pan > 1) {
+    pan = 1;
+  }
+  playPluck(maxSpeed, pan * 0.75);
 });
 
 let drops: Entity[] = [];
