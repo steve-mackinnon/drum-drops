@@ -43,7 +43,8 @@ Events.on(physicsEngine, "collisionStart", (e) => {
 
 let drops: Entity[] = [];
 
-document.body.appendChild(app.view);
+const resetButton = document.getElementById("reset-button");
+document.body.insertBefore(app.view, resetButton);
 
 // Add a container to center our sprite stack on the page
 const container = new PIXI.Container();
@@ -108,7 +109,7 @@ function createMap() {
   return createRandomizedSurfaces(physicsEngine.world, container, numSurfaces);
 }
 
-document.getElementById("reset-button")?.addEventListener("mousedown", () => {
+resetButton?.addEventListener("mousedown", () => {
   if (!surfaces) {
     return;
   }
