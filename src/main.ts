@@ -43,6 +43,8 @@ Events.on(physicsEngine, "collisionStart", (e) => {
 
 let drops: Entity[] = [];
 
+// Add game canvas to document
+app.view.className = "game";
 const resetButton = document.getElementById("reset-button");
 document.body.insertBefore(app.view, resetButton);
 

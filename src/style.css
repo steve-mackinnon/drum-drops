@@ -5,7 +5,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: rgb(10, 10, 10);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -70,16 +70,13 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: transparent;
   cursor: pointer;
   transition: border-color 0.25s;
+  stroke: rgb(190, 190, 190);
 }
 button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  stroke: white;
 }
 
 @media (prefers-color-scheme: light) {
@@ -100,4 +97,13 @@ button:focus-visible {
   position: absolute;
   top: 10px;
   right: 10px;
+}
+
+.game {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
