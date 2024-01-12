@@ -17,8 +17,10 @@ async function createBufferFromFile(filename: string) {
   return decoded;
 }
 
+let buffers: AudioBuffer[];
+
 async function loadBuffers() {
-  buffers = await Promise.all([
+  const b = await Promise.all([
     createBufferFromFile("cowbell.wav"),
     createBufferFromFile("kick.wav"),
     createBufferFromFile("shaker.wav"),
@@ -29,9 +31,10 @@ async function loadBuffers() {
     createBufferFromFile("uh.wav"),
     createBufferFromFile("808long.wav"),
   ]);
+  if (b) {
+    buffers = b;
+  }
 }
-
-let buffers: AudioBuffer[];
 
 function getRandomBuffer() {
   const val = Math.random();
@@ -55,7 +58,7 @@ export async function playPluck(speed: number, pan: number) {
 
   const audioContext = Tone.context.rawContext;
   let node: AudioScheduledSourceNode;
-  if (Math.random() > 0.3) {
+  if (Math.random() > 0.3 && buffers !== undefined) {
     const sample = audioContext.createBufferSource();
     sample.buffer = getRandomBuffer();
     node = sample;
