@@ -8,11 +8,8 @@ import {
   createRandomizedSurfaces,
   renderPoly,
 } from "./entityfactory";
+import { clamp } from "./helpers";
 
-const gravity = {
-  x: 0,
-  y: 0.1,
-};
 const app = new PIXI.Application<HTMLCanvasElement>({
   background: "rgb(10,10,10)",
   resizeTo: window,
@@ -50,7 +47,7 @@ Events.on(physicsEngine, "collisionStart", (e) => {
     },
     { maxSpeed: 0, pan: 0 },
   );
-  playPluck(maxSpeed, Math.min(1, Math.max(-1, pan * 0.75)));
+  playPluck(maxSpeed, clamp(pan * 0.75, -1, 1));
 });
 
 let drops: Entity[] = [];
@@ -86,6 +83,10 @@ app.ticker.add((delta) => {
   }
 
   let indicesToRemove: number[] = [];
+  const gravity = {
+    x: 0,
+    y: 0.1,
+  };
   for (let i = 0; i < drops.length; i++) {
     const drop = drops[i];
     Body.applyForce(drop.body, drop.body.position, {
