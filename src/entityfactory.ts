@@ -21,6 +21,7 @@ export function createSurface(
       angle: info.angle,
       density: 1000000000000,
     }),
+    alpha: 0.2,
   };
   Composite.add(world, surface.body);
   container.addChild(surface.graphics);
@@ -47,6 +48,7 @@ export function createRainDrop(
   const shape: Entity = {
     graphics: ro,
     body: Bodies.circle(x, y, 5),
+    alpha: 0.2,
   };
   shape.body.mass = 1;
   shape.body.restitution = 0.9;
@@ -56,7 +58,7 @@ export function createRainDrop(
 
 export function renderPoly(surface: Entity) {
   surface.graphics.clear();
-  surface.graphics.beginFill(0x4d0396);
+  surface.graphics.beginFill(`rgba(128, 0, 255, ${surface.alpha})`);
   surface.graphics.drawPolygon(surface.body.vertices);
   surface.graphics.endFill();
 }

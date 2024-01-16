@@ -31,23 +31,38 @@ const physicsEngine = Engine.create();
 physicsEngine.gravity.scale = 0;
 
 Events.on(physicsEngine, "collisionStart", (e) => {
-  const { maxSpeed, pan } = e.pairs.reduce(
+  interface CollisionInfo {
+    maxSpeed: number;
+    pan: number;
+    staticBody: Body | undefined;
+  }
+  const { maxSpeed, pan, staticBody } = e.pairs.reduce(
     (prev, current) => {
       const fastestBody = [current.bodyA, current.bodyB].reduce(
         (prev, current) => {
           return current.speed > prev.speed ? current : prev;
         },
       );
+      const staticBodies = [current.bodyA, current.bodyB].filter(
+        (b) => b.isStatic,
+      );
       return fastestBody.speed > prev.maxSpeed
         ? {
             maxSpeed: fastestBody.speed,
             pan: (fastestBody.position.x / innerWidth) * 2 - 1,
+            staticBody: staticBodies.length > 0 ? staticBodies[0] : undefined,
           }
         : prev;
     },
-    { maxSpeed: 0, pan: 0 },
+    { maxSpeed: 0, pan: 0, staticBody: undefined } as CollisionInfo,
   );
   playPluck(maxSpeed, clamp(pan * 0.75, -1, 1));
+  if (staticBody) {
+    const surface = surfaces.find((s) => s.body.id === staticBody.id);
+    if (surface) {
+      surface.alpha = Math.min(1.0, maxSpeed / 160);
+    }
+  }
 });
 
 let drops: Entity[] = [];
@@ -80,6 +95,9 @@ app.ticker.add((delta) => {
 
   for (const surface of surfaces) {
     renderPoly(surface);
+    if (surface.alpha > 0.2) {
+      surface.alpha *= 0.9;
+    }
   }
 
   let indicesToRemove: number[] = [];
