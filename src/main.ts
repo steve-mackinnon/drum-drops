@@ -34,25 +34,23 @@ const physicsEngine = Engine.create();
 physicsEngine.gravity.scale = 0;
 
 Events.on(physicsEngine, "collisionStart", (e) => {
-  let maxSpeed = 0;
-  let pan = 0;
-  for (const pair of e.pairs) {
-    if (pair.bodyA.speed > maxSpeed) {
-      maxSpeed = pair.bodyA.speed;
-      pan = (pair.bodyA.position.x / innerWidth) * 2 - 1;
-    }
-    if (pair.bodyB.speed > maxSpeed) {
-      maxSpeed = pair.bodyB.speed;
-      pan = (pair.bodyB.position.x / innerWidth) * 2 - 1;
-    }
-  }
-  if (pan < -1) {
-    pan = -1;
-  }
-  if (pan > 1) {
-    pan = 1;
-  }
-  playPluck(maxSpeed, pan * 0.75);
+  const { maxSpeed, pan } = e.pairs.reduce(
+    (prev, current) => {
+      const fastestBody = [current.bodyA, current.bodyB].reduce(
+        (prev, current) => {
+          return current.speed > prev.speed ? current : prev;
+        },
+      );
+      return fastestBody.speed > prev.maxSpeed
+        ? {
+            maxSpeed: fastestBody.speed,
+            pan: (fastestBody.position.x / innerWidth) * 2 - 1,
+          }
+        : prev;
+    },
+    { maxSpeed: 0, pan: 0 },
+  );
+  playPluck(maxSpeed, Math.min(1, Math.max(-1, pan * 0.75)));
 });
 
 let drops: Entity[] = [];
@@ -78,9 +76,7 @@ app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
 
 // Set all sprite's properties to the same value, animated over time
 app.ticker.add((delta) => {
-  const desiredDelta = 0.5;
-  const deltaMultiplier = delta / desiredDelta;
-  if (userHasInteracted && Math.random() > 0.99 * deltaMultiplier) {
+  if (userHasInteracted && Math.random() > 0.99) {
     drops.push(createRainDrop(physicsEngine.world, container));
   }
   Engine.update(physicsEngine, delta);
