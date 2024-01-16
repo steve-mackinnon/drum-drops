@@ -77,9 +77,10 @@ app.stage.onpointerdown = (ev: PIXI.FederatedPointerEvent) => {
 };
 
 // Set all sprite's properties to the same value, animated over time
-let elapsed = 0.0;
 app.ticker.add((delta) => {
-  if (userHasInteracted && Math.random() > 0.99) {
+  const desiredDelta = 0.5;
+  const deltaMultiplier = delta / desiredDelta;
+  if (userHasInteracted && Math.random() > 0.99 * deltaMultiplier) {
     drops.push(createRainDrop(physicsEngine.world, container));
   }
   Engine.update(physicsEngine, delta);
@@ -87,8 +88,6 @@ app.ticker.add((delta) => {
   for (const surface of surfaces) {
     renderPoly(surface);
   }
-
-  elapsed += delta / 60;
 
   let indicesToRemove: number[] = [];
   for (let i = 0; i < drops.length; i++) {
