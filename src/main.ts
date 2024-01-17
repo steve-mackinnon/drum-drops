@@ -60,7 +60,7 @@ Events.on(physicsEngine, "collisionStart", (e) => {
   if (staticBody) {
     const surface = surfaces.find((s) => s.body.id === staticBody.id);
     if (surface) {
-      surface.alpha = Math.min(1.0, maxSpeed / 160);
+      surface.alpha = Math.max(0.2, Math.min(1.0, maxSpeed / 100));
     }
   }
 });
@@ -96,7 +96,7 @@ app.ticker.add((delta) => {
   for (const surface of surfaces) {
     renderPoly(surface);
     if (surface.alpha > 0.2) {
-      surface.alpha *= 0.9;
+      surface.alpha *= 0.99;
     }
   }
 
