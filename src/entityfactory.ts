@@ -21,7 +21,7 @@ export function createSurface(
       angle: info.angle,
       density: 1000000000000,
     }),
-    alpha: 0.2,
+    collisionRecency: 0,
   };
   Composite.add(world, surface.body);
   container.addChild(surface.graphics);
@@ -48,7 +48,7 @@ export function createRainDrop(
   const shape: Entity = {
     graphics: ro,
     body: Bodies.circle(x, y, 5),
-    alpha: 0.2,
+    collisionRecency: 0,
   };
   shape.body.mass = 1;
   shape.body.restitution = 0.9;
@@ -57,8 +57,21 @@ export function createRainDrop(
 }
 
 export function renderPoly(surface: Entity) {
+  const interpolateColor = (
+    neutral: PIXI.Color,
+    active: PIXI.Color,
+  ): PIXI.Color => {
+    const interpolateChannel = (neutral: number, active: number) =>
+      neutral + (active - neutral) * surface.collisionRecency;
+    const r = interpolateChannel(neutral.red, active.red);
+    const g = interpolateChannel(neutral.green, active.green);
+    const b = interpolateChannel(neutral.blue, active.blue);
+    return new PIXI.Color([r, g, b]);
+  };
   surface.graphics.clear();
-  surface.graphics.beginFill(`rgba(128, 0, 255, ${surface.alpha})`);
+  const NEUTRAL_COLOR = new PIXI.Color([0.2, 0, 0.6]);
+  const ACTIVE_COLOR = new PIXI.Color([1, 1, 1]);
+  surface.graphics.beginFill(interpolateColor(NEUTRAL_COLOR, ACTIVE_COLOR));
   surface.graphics.drawPolygon(surface.body.vertices);
   surface.graphics.endFill();
 }
