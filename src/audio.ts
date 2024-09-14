@@ -1,6 +1,5 @@
 import * as Tone from "tone";
 
-// const audioContext = new AudioContext();
 const output = new Tone.Reverb({
   wet: 0.2,
   decay: 2.0,
@@ -20,7 +19,7 @@ async function createBufferFromFile(filename: string) {
 let buffers: AudioBuffer[];
 
 async function loadBuffers() {
-  const b = await Promise.all([
+  buffers = await Promise.all([
     createBufferFromFile("cowbell.wav"),
     createBufferFromFile("kick.wav"),
     createBufferFromFile("shaker.wav"),
@@ -31,9 +30,6 @@ async function loadBuffers() {
     createBufferFromFile("uh.wav"),
     createBufferFromFile("808long.wav"),
   ]);
-  if (b) {
-    buffers = b;
-  }
 }
 
 function getRandomBuffer() {
